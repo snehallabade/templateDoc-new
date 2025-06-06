@@ -10,6 +10,7 @@ export const users = pgTable("users", {
 
 export const templates = pgTable("templates", {
   id: serial("id").primaryKey(),
+  user_id: text("user_id").notNull(),
   name: text("name").notNull(),
   originalFileName: text("original_file_name").notNull(),
   fileType: text("file_type").notNull(), // 'docx' | 'excel'

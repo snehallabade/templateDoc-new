@@ -44,9 +44,11 @@ export class DatabaseStorage implements IStorage {
 
   // Template methods
   async createTemplate(template: InsertTemplate): Promise<Template> {
+    console.log('Inserting template with user_id:', template.user_id);
     const result = await db.insert(templates).values({
       ...template,
-      placeholders: template.placeholders as any
+      placeholders: template.placeholders as any,
+      user_id: template.user_id
     }).returning();
     return result[0];
   }

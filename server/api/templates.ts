@@ -145,8 +145,10 @@ router.post('/', upload.single('file'), async (req, res) => {
       storageUrl: storageFile.url,
       storageId: fileName, // Store the actual filename for downloads
       placeholders,
-      user_id: userId
+      user_id: String(userId) // Ensure user_id is always a string
     };
+
+    console.log('templateData before insert:', templateData);
 
     const template = await storage.createTemplate(templateData);
     

@@ -1,10 +1,42 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 import { documentProcessor } from '../services/documentProcessor';
 import { supabaseStorage } from '../services/supabaseStorage';
 import { insertDocumentSchema } from '../../shared/schema';
+import { supabase } from '../services/supabaseStorage';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: { id: string };
+  }
+}
 
 const router = Router();
+
+// Add this middleware before your routes
+const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  // Expect JWT in Authorization header as 'Bearer <token>'
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No authorization header' });
+  }
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  try {
+    const jwtSecret = String(process.env.SUPABASE_JWT_SECRET ?? 'YOUR_SUPABASE_JWT_SECRET');
+    const decoded = require('jsonwebtoken').verify(token, jwtSecret) as { sub: string };
+    if (typeof (decoded as any).sub !== 'string') {
+      return res.status(401).json({ error: 'Invalid token payload' });
+    }
+    req.user = { id: (decoded as any).sub as string };
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+router.use(authenticate);
 
 // GET /api/documents - Get all documents
 router.get('/', async (req, res) => {
@@ -121,6 +153,27 @@ router.post('/generate', async (req, res) => {
 
     // Upload processed document to storage
     const storageFile = await supabaseStorage.uploadFile(finalBuffer, 'generated-docs', finalFileName);
+
+    // Debug: log req.user before insert
+    console.log('req.user:', req.user);
+
+    // Insert metadata into generated_documents table for real-time dashboard
+    if (req.user && req.user.id) {
+      const { data, error } = await supabase
+        .from('generated_documents')
+        .insert([{
+          user_id: req.user.id,
+          template_id: template.id,
+          name: finalFileName,
+          storage_path: storageFile.name,
+          created_at: new Date().toISOString()
+        }]);
+      if (error) {
+        console.error('Error inserting into generated_documents:', error);
+      } else {
+        console.log('Inserted into generated_documents:', data);
+      }
+    }
 
     // Save document metadata to database
     const documentData = {
