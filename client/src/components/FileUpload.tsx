@@ -3,6 +3,7 @@ import { Upload, FileText, FileSpreadsheet, AlertCircle, CheckCircle } from 'luc
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/lib/supabase';
 
 interface FileUploadProps {
   onFileUpload: (file: File, placeholders: string[], templateId: number, templateName: string) => void;
@@ -30,9 +31,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
       const formData = new FormData();
       formData.append('file', file);
 
+      // Get the current session and access token
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+
       const response = await fetch('/api/templates', {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       if (!response.ok) {

@@ -1,12 +1,44 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { storage } from '../storage';
 import { documentProcessor } from '../services/documentProcessor';
 import { supabaseStorage } from '../services/supabaseStorage';
 import { insertTemplateSchema } from '../../shared/schema';
+import jwt from 'jsonwebtoken';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: { id: string };
+  }
+}
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Add this middleware before your routes
+const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  // Expect JWT in Authorization header as 'Bearer <token>'
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No authorization header' });
+  }
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  try {
+    const jwtSecret = String(process.env.SUPABASE_JWT_SECRET ?? 'YOUR_SUPABASE_JWT_SECRET');
+    const decoded = jwt.verify(token, jwtSecret) as { sub: string };
+    if (typeof (decoded as any).sub !== 'string') {
+      return res.status(401).json({ error: 'Invalid token payload' });
+    }
+    req.user = { id: (decoded as any).sub as string };
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+router.use(authenticate);
 
 // GET /api/templates - Get all templates
 router.get('/', async (req, res) => {
@@ -102,13 +134,18 @@ router.post('/', upload.single('file'), async (req, res) => {
     const storageFile = await supabaseStorage.uploadFile(file.buffer, 'templates', fileName);
 
     // Save template metadata to database
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
     const templateData = {
       name: file.originalname,
       originalFileName: file.originalname,
       fileType,
       storageUrl: storageFile.url,
       storageId: fileName, // Store the actual filename for downloads
-      placeholders
+      placeholders,
+      user_id: userId
     };
 
     const template = await storage.createTemplate(templateData);
