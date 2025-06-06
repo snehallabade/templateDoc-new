@@ -116,13 +116,31 @@ const DocumentProcessor: React.FC<DocumentProcessorProps> = ({
     }
   };
 
-  const downloadDocument = (doc: ProcessedDocument) => {
-    const link = document.createElement("a");
-    link.href = doc.downloadUrl;
-    link.download = doc.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const downloadDocument = async (doc: ProcessedDocument) => {
+    try {
+      // Get the current session and access token
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+      
+      const response = await fetch(doc.downloadUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to download');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Download failed: ' + (err instanceof Error ? err.message : err));
+    }
   };
 
   const getFileIcon = (fileType: string) => {
