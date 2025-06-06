@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import { tmpdir } from 'os';
 
 // Default LibreOffice path for Windows
-const LIBREOFFICE_PATH = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+const LIBREOFFICE_PATH = '""D:\\LibreOffice\\program\\soffice.com""';
 
 export interface ProcessingResult {
   processedBuffer: Buffer;
