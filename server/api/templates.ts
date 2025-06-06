@@ -17,6 +17,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Add this middleware before your routes
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  // Log the Authorization header for debugging
+  console.log('Authorization header:', req.headers['authorization']);
   // Expect JWT in Authorization header as 'Bearer <token>'
   const authHeader = req.headers['authorization'];
   if (!authHeader) {

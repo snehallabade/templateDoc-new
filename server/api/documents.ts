@@ -4,6 +4,7 @@ import { documentProcessor } from '../services/documentProcessor';
 import { supabaseStorage } from '../services/supabaseStorage';
 import { insertDocumentSchema } from '../../shared/schema';
 import { supabase } from '../services/supabaseStorage';
+import jwt from 'jsonwebtoken';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -15,6 +16,10 @@ const router = Router();
 
 // Add this middleware before your routes
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  // Log the JWT secret for debugging
+  console.log('SUPABASE_JWT_SECRET:', process.env.SUPABASE_JWT_SECRET);
+  // Log the Authorization header for debugging
+  console.log('Authorization header:', req.headers['authorization']);
   // Expect JWT in Authorization header as 'Bearer <token>'
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
@@ -26,13 +31,15 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
   }
   try {
     const jwtSecret = String(process.env.SUPABASE_JWT_SECRET ?? 'YOUR_SUPABASE_JWT_SECRET');
-    const decoded = require('jsonwebtoken').verify(token, jwtSecret) as { sub: string };
-    if (typeof (decoded as any).sub !== 'string') {
-      return res.status(401).json({ error: 'Invalid token payload' });
+    const decoded = jwt.verify(token, jwtSecret);
+    if (typeof decoded === 'object' && decoded && typeof (decoded as any).sub === 'string') {
+      req.user = { id: (decoded as any).sub };
+    } else {
+      req.user = undefined;
     }
-    req.user = { id: (decoded as any).sub as string };
     next();
   } catch (err) {
+    console.error('JWT verification error:', err);
     return res.status(401).json({ error: 'Invalid token' });
   }
 };

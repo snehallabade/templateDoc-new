@@ -9,6 +9,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/lib/supabase";
 
 interface ProcessedDocument {
   id: number;
@@ -46,11 +47,16 @@ const DocumentProcessor: React.FC<DocumentProcessorProps> = ({
     setError(null);
 
     try {
+      // Get the current session and access token
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+
       // Generate original format document
       const originalResponse = await fetch("/api/documents/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           templateId,
@@ -70,6 +76,7 @@ const DocumentProcessor: React.FC<DocumentProcessorProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           templateId,
