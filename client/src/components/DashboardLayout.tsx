@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, LogOut, Upload } from 'lucide-react';
+import { Home, Settings, LogOut, Upload, FileText, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,10 +37,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Button
             variant="ghost"
             className="w-full justify-start px-4 py-2"
-            onClick={() => navigate('/dashboard/upload')}
+            onClick={() => navigate('/dashboard/templates')}
           >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Templates
+            <FileText className="mr-2 h-4 w-4" />
+            Templates
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start px-4 py-2"
+            onClick={() => navigate('/dashboard/generated-pdfs')}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Generated PDFs
           </Button>
           <Button
             variant="ghost"

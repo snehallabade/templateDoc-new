@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FileUpload from '@/components/FileUpload';
 import PlaceholderForm from '@/components/PlaceholderForm';
 import DocumentProcessor from '@/components/DocumentProcessor';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Zap, Download, Shield } from 'lucide-react';
 import { StorageFile } from '@/services/storageService';
+import { useLocation } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 // Types from old Index.tsx
 type Step = 'upload' | 'form' | 'process';
@@ -19,6 +21,7 @@ interface AppState {
 }
 
 export default function TemplateWizard() {
+  const location = useLocation();
   const [state, setState] = useState<AppState>({
     step: 'upload',
     templateFile: null,
@@ -27,6 +30,35 @@ export default function TemplateWizard() {
     placeholders: [],
     formData: {}
   });
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
+
+  // Check for templateId in URL and preload template for Fill Data step
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const templateId = params.get('templateId');
+    if (templateId && !state.templateId) {
+      setLoadingTemplate(true);
+      (async () => {
+        const { data } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('id', templateId)
+          .single();
+        if (data) {
+          setState(prev => ({
+            ...prev,
+            step: 'form',
+            templateId: data.id,
+            templateName: data.name,
+            placeholders: Array.isArray(data.placeholders) ? data.placeholders : [],
+            templateFile: new File([], data.original_file_name || data.name || 'template.docx'), // Placeholder File object
+          }));
+        }
+        setLoadingTemplate(false);
+      })();
+    }
+    // eslint-disable-next-line
+  }, [location.search]);
 
   const handleFileUpload = (file: File, placeholders: string[], templateId: number, templateName: string) => {
     setState({
@@ -66,6 +98,9 @@ export default function TemplateWizard() {
   };
 
   const renderStep = () => {
+    if (loadingTemplate) {
+      return <div className="text-center py-12 text-gray-500">Loading template...</div>;
+    }
     switch (state.step) {
       case 'upload':
         return <FileUpload onFileUpload={handleFileUpload} />;
