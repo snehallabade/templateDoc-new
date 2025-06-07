@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StorageFile {
@@ -95,6 +94,14 @@ class StorageService {
       .getPublicUrl(fileName);
     
     return data.publicUrl;
+  }
+
+  async listFiles(bucket: 'templates' | 'generated-docs', path: string = '') {
+    const { data, error } = await supabase.storage.from(bucket).list(path, { limit: 100, offset: 0 });
+    if (error) {
+      throw new Error(`Failed to list files: ${error.message}`);
+    }
+    return data;
   }
 }
 
