@@ -120,7 +120,11 @@ function TemplateManagementPage() {
           <h1 className="text-2xl font-bold">Template Management</h1>
           <p className="text-gray-600">Upload and manage Word templates with predefined placeholders</p>
         </div>
-        <Button className="h-10 px-6 text-base font-semibold" variant="default">
+        <Button
+          className="h-10 px-6 text-base font-semibold"
+          variant="default"
+          onClick={() => navigate('/dashboard/upload')}
+        >
           + Upload Template
         </Button>
       </div>

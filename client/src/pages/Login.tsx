@@ -42,12 +42,16 @@ const Login = () => {
       if (isSignUp) {
         await signUp(formData.email, formData.password, fullName);
         toast({
-          title: 'Account created successfully',
-          description: 'Please check your email to verify your account.',
+          title: 'Account created!',
+          description: 'Please check your email to confirm your account before logging in.',
         });
       } else {
         await signIn(formData.email, formData.password);
-        navigate('/dashboard');
+        toast({
+          title: 'Login successful!',
+          description: 'You have been signed in.',
+        });
+        setTimeout(() => navigate('/dashboard'), 1000);
       }
     } catch (error) {
       toast({

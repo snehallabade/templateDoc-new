@@ -42,11 +42,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (signUpError) throw signUpError;
 
     if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{ id: data.user.id, full_name: fullName }]);
-      
-      if (profileError) throw profileError;
+      try {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ id: data.user.id, full_name: fullName }]);
+        if (profileError) {
+          console.warn('Profile insert error:', profileError.message);
+        }
+      } catch (e) {
+        console.warn('Profile insert exception:', e);
+      }
     }
   };
 
