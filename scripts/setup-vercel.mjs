@@ -44,6 +44,30 @@ async function setupVercelOutput() {
     join(staticDir, 'config.json'),
     JSON.stringify(staticConfig, null, 2)
   );
+
+  // Environment variables config
+  const envConfig = {
+    "version": 3,
+    "routes": [
+      {
+        "src": "/api/.*",
+        "headers": {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        }
+      }
+    ],
+    "env": {
+      "SUPABASE_URL": process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+      "SUPABASE_ANON_KEY": process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
+    }
+  };
+
+  await writeFile(
+    join(staticDir, 'config.json'),
+    JSON.stringify(envConfig, null, 2)
+  );
 }
 
 setupVercelOutput().catch(console.error);
