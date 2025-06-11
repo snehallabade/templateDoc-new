@@ -1,11 +1,20 @@
 {
   "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist/public",
+  "outputDirectory": ".vercel/output/static",
   "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "public": true,
+  "functions": {
+    "api/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1.js"
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
