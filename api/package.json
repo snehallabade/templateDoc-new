@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "exceljs": "^4.4.0",
+    "pizzip": "^3.1.6"
+  }
+}

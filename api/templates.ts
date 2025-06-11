@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabase, supabaseStorage } from './services/supabaseStorage';
-import { documentProcessor } from './services/documentProcessor';
-import { storage } from './services/storage';
+import { supabase, supabaseStorage } from './services/supabaseStorage.js';
+import { documentProcessor } from './services/documentProcessor.js';
+import { storage } from './services/storage.js';
 
 interface FileRequest extends VercelRequest {
   body: {

@@ -1,9 +1,9 @@
-import ExcelJS from 'exceljs';
+import * as ExcelJS from 'exceljs';
+import PizZip from 'pizzip';
 
-export const documentProcessor = {
+const processor = {
   async extractPlaceholdersFromDocx(buffer: Buffer): Promise<string[]> {
-    const zip = require('pizzip');
-    const doc = new zip(buffer);
+    const doc = new PizZip(buffer);
     const content = doc.files['word/document.xml'].asText();
     const matches = content.match(/\{([^}]+)\}/g) || [];
     return matches.map(match => match.slice(1, -1));
@@ -27,10 +27,8 @@ export const documentProcessor = {
 
     return Array.from(placeholders);
   },
-
   async processDocxTemplate(buffer: Buffer, data: Record<string, string>) {
-    const zip = require('pizzip');
-    const doc = new zip(buffer);
+    const doc = new PizZip(buffer);
     let content = doc.files['word/document.xml'].asText();
 
     // Replace all placeholders with their values
@@ -84,3 +82,5 @@ export const documentProcessor = {
     };
   }
 };
+
+export const documentProcessor = processor;

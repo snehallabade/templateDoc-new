@@ -1,5 +1,5 @@
-import { supabase } from './supabaseStorage';
-import type { Template, Document } from '../interfaces';
+import { supabase } from './supabaseStorage.js';
+import type { Template, Document } from '../interfaces.js';
 
 export const storage = {
   async createTemplate(data: Omit<Template, 'id' | 'createdAt'>) {
