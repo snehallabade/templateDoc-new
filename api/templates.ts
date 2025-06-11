@@ -1,9 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabase } from '../server/services/supabaseStorage';
-import { documentProcessor } from '../server/services/documentProcessor';
-import { storage } from '../server/storage';
+import { supabase, supabaseStorage } from './services/supabaseStorage';
+import { documentProcessor } from './services/documentProcessor';
+import { storage } from './services/storage';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+interface FileRequest extends VercelRequest {
+  body: {
+    buffer: Buffer;
+    originalname: string;
+    mimetype: string;
+  }
+}
+
+export default async function handler(req: FileRequest, res: VercelResponse) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -48,7 +56,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Extract user ID from authorization header
         const authHeader = req.headers.authorization;
         const token = authHeader?.split(' ')[1]; // Bearer token
-        const { data: { user } } = await supabase.auth.getUser(token);
+        const { data: { user } } = await supabase.auth.getUser(token);        if (!user?.id) {
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
 
         const template = await storage.createTemplate({
           name: file.originalname,
@@ -57,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           storageUrl: publicUrl,
           storageId: fileName,
           placeholders,
-          user_id: user?.id
+          user_id: user.id
         });
 
         return res.status(200).json({ template, placeholders, storageFile });
