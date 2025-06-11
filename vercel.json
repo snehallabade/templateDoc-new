@@ -1,15 +1,22 @@
 {
-  "buildCommand": "cd client && npm install && npm run build",
-  "outputDirectory": "client/dist",
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist/public",
   "framework": "vite",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "/api/$1.js"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "${VITE_SUPABASE_URL}",
+    "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}",
+    "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}",
+    "DATABASE_URL": "${DATABASE_URL}",
+    "DIRECT_URL": "${DIRECT_URL}"
+  }
 }
