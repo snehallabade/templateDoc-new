@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "odrvrgtxnanquyeuiocx.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url"
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/index.html"
+    }
+  ]
+}
