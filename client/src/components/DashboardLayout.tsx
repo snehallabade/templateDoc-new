@@ -62,9 +62,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* User Info and Sign Out */}
         <div className="p-4 border-t flex flex-col gap-2">
           {user && (
-            <div className="flex items-center gap-2 mb-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar_url || undefined} alt={user.email || 'User'} />
+            <div className="flex items-center gap-2 mb-2">              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.user_metadata?.avatar_url || undefined} alt={user.email || 'User'} />
                 <AvatarFallback>{user.email ? user.email[0].toUpperCase() : '?'}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">

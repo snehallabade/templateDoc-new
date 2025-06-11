@@ -121,7 +121,8 @@ class DocumentProcessorCLI {
         fileType,
         storageUrl: storageFile.url,
         storageId: storageFile.id,
-        placeholders
+        placeholders,
+        user_id: 'system'  // CLI operations use system user
       };
 
       const template = await storage.createTemplate(templateData);
